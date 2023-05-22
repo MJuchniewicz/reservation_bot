@@ -10,10 +10,8 @@ from reservation import *
 
 
 def main() -> None:
-    """Run the bot."""
     application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
-    # Add conversation handler with the states CHOOSING, TYPING_CHOICE and TYPING_REPLY
     conv_handler = ConversationHandler(
         entry_points=[CommandHandler("start", start)],
         states={
@@ -26,15 +24,13 @@ def main() -> None:
                 ),
             ],
             NAME:  [
-                MessageHandler(filters.Regex("^Cancel$"), cancel),
-                MessageHandler(filters.TEXT, ask_name),
+                MessageHandler(filters.TEXT & (
+                    ~filters.Regex('^Cancel$')), ask_name),
             ],
             PHONE_NUMBER: [
-                MessageHandler(filters.Regex("^Cancel$"), cancel),
-                MessageHandler(filters.TEXT, ask_phone_number)],
+                MessageHandler(filters.TEXT & (~filters.Regex('^Cancel$')), ask_phone_number)],
             EMAIL: [
-                MessageHandler(filters.Regex("^Cancel$"), cancel),
-                MessageHandler(filters.TEXT, ask_email)],
+                MessageHandler(filters.TEXT & (~filters.Regex('^Cancel$')), ask_email)],
             TYPING_CHOICE: [
                 MessageHandler(
                     filters.TEXT & ~(filters.COMMAND | filters.Regex(
@@ -60,7 +56,8 @@ def main() -> None:
             ],
         },
         fallbacks=[MessageHandler(filters.Regex("^Done$"), done), MessageHandler(
-            filters.Regex("^Start over$"), start_over)],
+            filters.Regex("^Start over$"), start_over), MessageHandler(
+            filters.Regex("^Cancel$"), cancel)],
     )
 
     application.add_handler(conv_handler)
