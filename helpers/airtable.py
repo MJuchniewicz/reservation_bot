@@ -5,25 +5,23 @@ from pyairtable import Table
 
 from config.config import AIRTABLE_TOKEN
 
+AIRTABLE_RESERVATION_BASE_ID = 'appwOY3WFhNVYEzrB'
 
-def save_to_airtable(reservation_data):
+
+def save_to_airtable(data, table_name):
     """Save the user data to Airtable."""
-    auth_token = AIRTABLE_TOKEN
-    base_id = 'appwOY3WFhNVYEzrB'
-    table_name = 'reservations'
+    table = Table(AIRTABLE_TOKEN, AIRTABLE_RESERVATION_BASE_ID, table_name)
 
-    table = Table(auth_token, base_id, table_name)
-
-    table.create(reservation_data)
+    table.create(data)
 
 
-async def ask_save_to_db(update: Update, context: ContextTypes.DEFAULT_TYPE) -> int:
+async def ask_save_to_db(update: Update, context: ContextTypes.DEFAULT_TYPE, table_name) -> int:
     text = update.message.text.lower()
     user_data = context.user_data
-    user_data['timestamp'] = datetime.utcnow().isoformat
+    user_data['timestamp'] = datetime.utcnow().isoformat()
 
     if text == "yes":
-        save_to_airtable(user_data)
+        save_to_airtable(user_data, table_name)
         await update.message.reply_text("Data saved to Airtable.", reply_markup=ReplyKeyboardRemove())
         user_data.clear()
 

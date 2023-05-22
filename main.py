@@ -1,6 +1,7 @@
 
 from telegram import ReplyKeyboardRemove, Update, ReplyKeyboardMarkup
 from telegram.ext import Application, CommandHandler, ContextTypes, ConversationHandler, MessageHandler, filters, CallbackQueryHandler
+from functools import partial
 
 from typing import Dict
 
@@ -12,6 +13,9 @@ from helpers.error import error_handler
 from helpers.calendar.calendar_handlers import calendar_handler, inline_handler
 from helpers.airtable import ask_save_to_db
 from helpers.logger import logger
+
+table_name = "reservations"
+ask_save_to_db_with_table = partial(ask_save_to_db, table_name=table_name)
 
 CHOOSING, TYPING_REPLY, TYPING_CHOICE, CHOICE_STATE, CREATE_RESERVATION, EMAIL, PHONE_NUMBER, FINISH_RESERVATION, NAME = range(
     9)
@@ -214,7 +218,7 @@ def main() -> None:
             ],
             CHOICE_STATE: [
                 MessageHandler(
-                    filters.Regex("^(Yes|No)$"), ask_save_to_db,
+                    filters.Regex("^(Yes|No)$"), ask_save_to_db_with_table,
                 )
             ],
             FINISH_RESERVATION: [
